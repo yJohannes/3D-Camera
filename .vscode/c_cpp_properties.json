@@ -1,0 +1,35 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/SFML-2.6.1/include",
+                "C:/glad/include",
+                "C:/glm"
+            ],
+            
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+
+            "windowsSdkVersion": "10.0.22621.0",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "C:/msys64/ucrt64/bin/g++.exe",
+
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**",
+                    "C:/SFML-2.6.1/include",
+                    "C:/glm",
+                    "C:/glad/include"
+                ]
+            }
+        }
+    ],
+    "version": 4
+}
