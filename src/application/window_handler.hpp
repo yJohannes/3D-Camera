@@ -39,7 +39,6 @@ public:
 private:
     void init_events()
     {
-        // Register events with member function pointers
         register_event_callback(sf::Event::Closed,               &WindowHandler::on_window_closed);
         register_event_callback(sf::Event::MouseButtonPressed,   &WindowHandler::on_mouse_pressed);
         register_event_callback(sf::Event::MouseButtonReleased,  &WindowHandler::on_mouse_released);
@@ -55,8 +54,6 @@ private:
         });
     }
 
-
-    // Event handling functions
     void on_window_closed(const sf::Event& event)
     {
         r_window.close();
@@ -100,54 +97,4 @@ private:
             view_changed.emit();
         }
     }
-
-
-/*
-        void init_events()
-        {
-
-                m_event_manager.add_callback(sf::Event::Closed, [this](const sf::Event &event) {
-                        r_window.close();
-                });
-                
-                m_event_manager.add_callback(sf::Event::MouseButtonPressed, [this](const sf::Event &event) {
-                        if (event.mouseButton.button == sf::Mouse::Left)
-                        {
-                                m_dragging = true;
-                                m_prev_mouse_pos = sf::Mouse::getPosition(r_window);
-                        }
-
-                        // more ...
-                });
-
-                m_event_manager.add_callback(sf::Event::MouseButtonReleased, [this](const sf::Event &event) {
-                        if (event.mouseButton.button == sf::Mouse::Left)
-                        {
-                                m_dragging = false;
-                        }
-                });
-
-                m_event_manager.add_callback(sf::Event::MouseWheelScrolled, [this](const sf::Event &event) {
-                        scroll_position = sf::Mouse::getPosition(r_window);
-
-                        float ds = event.mouseWheelScroll.delta;
-                        if (ds > 0)      zoom *= m_zoom_strength; 
-                        else if (ds < 0) zoom /= m_zoom_strength;
-
-                        view_changed.emit();
-                });
-
-                m_event_manager.add_callback(sf::Event::MouseMoved, [this](const sf::Event &event) {
-                        if (m_dragging)
-                        {
-                                Vec2i mouse_position = sf::Mouse::getPosition(r_window);
-                                offset += vec_cast<float>(m_prev_mouse_pos - mouse_position) * (1.0f / zoom);
-                                m_prev_mouse_pos = mouse_position;
-
-                                view_changed.emit();
-                        }
-                });
-        }
-
-*/
 };
