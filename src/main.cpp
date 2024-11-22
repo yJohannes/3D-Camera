@@ -6,7 +6,7 @@ int main()
     context.depthBits = 24;
     context.antialiasingLevel = 0;
 
-    MainWindow window(1200, 800, "Mandelbrot", context, sf::Style::Default);
+    MainWindow window(1200, 800, "3D Camera", context, sf::Style::Default);
     window.run();
     return 0;
 }
