@@ -12,60 +12,12 @@
 #include <glad/glad.h>
 #include <SFML/OpenGL.hpp>
 
-class Shader;
-
-class ComputeShader : public Shader
-{
-public:
-    ComputeShader(GLenum shader_type, const std::string &shader_path)
-    {
-        std::string shader_source = load_shader(shader_path);
-        GLuint shader = compile_shader(shader_type, shader_source);
-
-        m_program_ID = glCreateProgram();
-        glAttachShader(m_program_ID, shader);
-        glLinkProgram(m_program_ID);
-        glDeleteShader(shader);
-    }
-};
-
-class RenderShader : public Shader
-{
-public:
-    RenderShader(const std::string &vertex_path, const std::string &fragment_path)
-    {
-        std::string vertex_source = load_shader(vertex_path);
-        std::string fragment_source = load_shader(fragment_path);
-
-        GLuint vertex_shader = compile_shader(GL_VERTEX_SHADER, vertex_source);
-        GLuint fragment_shader = compile_shader(GL_FRAGMENT_SHADER, fragment_source);
-        
-        m_program_ID = glCreateProgram();
-        glAttachShader(m_program_ID, vertex_shader);
-        glAttachShader(m_program_ID, fragment_shader);
-        glLinkProgram(m_program_ID);
-        
-        int success;
-        glGetProgramiv(m_program_ID, GL_LINK_STATUS, &success);
-
-        if (!success)
-        {
-            char log[512];
-            glGetProgramInfoLog(m_program_ID, 512, nullptr, log);
-            throw std::runtime_error("Program Linking Error: " + std::string(log));
-        }
-
-        glDeleteShader(vertex_shader);
-        glDeleteShader(fragment_shader);
-    }
-};
-
 class Shader
 {
 protected:
     GLuint m_program_ID = 0;
 public:
-    ~Shader()
+    virtual ~Shader()
     {
         if (m_program_ID != 0)
         {
@@ -73,34 +25,49 @@ public:
         }
     }
 
-    void bind()
+    void bind() const
     {
         glUseProgram(m_program_ID);
     }
 
-    void unbind()
+    void unbind() const
     {
         glUseProgram(0);
     }
 
     void set_uniform_int(const std::string &variable_name, int value) const
     {
-        glUniform1i(glGetUniformLocation(m_program_ID, variable_name.c_str()), value);
+        GLint location = glGetUniformLocation(m_program_ID, variable_name.c_str());
+        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+        glUniform1i(location, value);
     }
 
     void set_uniform_float(const std::string &variable_name, float value) const
     {
-        glUniform1f(glGetUniformLocation(m_program_ID, variable_name.c_str()), value);
+        GLint location = glGetUniformLocation(m_program_ID, variable_name.c_str());
+        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+        glUniform1f(location, value);
     }
 
-    void set_vec3(const std::string &name, const glm::vec3 &value) const
+    void set_vec3(const std::string &variable_name, const glm::vec3 &vector) const
     {
-        glUniform3fv(glGetUniformLocation(m_program_ID, name.c_str()), 1, glm::value_ptr(value));
+        GLint location = glGetUniformLocation(m_program_ID, variable_name.c_str());
+        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+        glUniform3fv(location, 1, glm::value_ptr(vector));
     }
 
-    void set_mat4(const std::string &name, const glm::mat4 &value) const
+    void set_vec4(const std::string &variable_name, const glm::vec4 &vector) const
     {
-        glUniformMatrix4fv(glGetUniformLocation(m_program_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+        GLint location = glGetUniformLocation(m_program_ID, variable_name.c_str());
+        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+        glUniform4fv(location, 1, glm::value_ptr(vector));
+    }
+
+    void set_mat4(const std::string &variable_name, const glm::mat4 &matrix) const
+    {
+        GLint location = glGetUniformLocation(m_program_ID, variable_name.c_str());
+        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+        glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
     }
 
 
@@ -142,3 +109,56 @@ protected:
         return shader;
     }
 };
+
+class ComputeShader : public Shader
+{
+public:
+    ComputeShader(GLenum shader_type, const std::string &shader_path)
+    {
+        std::string shader_source = load_shader(shader_path);
+        GLuint shader = compile_shader(shader_type, shader_source);
+
+        m_program_ID = glCreateProgram();
+        glAttachShader(m_program_ID, shader);
+        glLinkProgram(m_program_ID);
+        glDeleteShader(shader);
+    }
+};
+
+class RenderShader : public Shader
+{
+private:
+    GLuint m_vertex_ID = 0;
+    GLuint m_fragment_ID = 0;
+public:
+    RenderShader(const std::string &vertex_path, const std::string &fragment_path)
+    {
+        std::string vertex_source = load_shader(vertex_path);
+        std::string fragment_source = load_shader(fragment_path);
+
+        m_vertex_ID = compile_shader(GL_VERTEX_SHADER, vertex_source);
+        m_fragment_ID = compile_shader(GL_FRAGMENT_SHADER, fragment_source);
+        
+        m_program_ID = glCreateProgram();
+        glAttachShader(m_program_ID, m_vertex_ID);
+        glAttachShader(m_program_ID, m_fragment_ID);
+        glLinkProgram(m_program_ID);
+        
+        int success;
+        glGetProgramiv(m_program_ID, GL_LINK_STATUS, &success);
+
+        if (!success)
+        {
+            char log[512];
+            glGetProgramInfoLog(m_program_ID, 512, nullptr, log);
+            throw std::runtime_error("Program Linking Error: " + std::string(log));
+        }
+    }
+
+    ~RenderShader()
+    {
+        glDeleteShader(m_vertex_ID);
+        glDeleteShader(m_fragment_ID);
+    }
+};
+

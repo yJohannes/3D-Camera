@@ -1,10 +1,16 @@
-#version 450
+#version 450 core
 
-layout(location = 0) in vec2 aPos; // Vertex position in NDC
+layout(location = 0) in vec3 a_pos;
 
 uniform mat4 u_mvp;
+uniform vec3 u_camera_position;
+
+out vec3 camera_position;
+out vec4 frag_position;
 
 void main()
 {
-    gl_Position = u_mvp * vec4(aPos, 0.0, 1.0);
+    camera_position = u_camera_position;
+    frag_position = u_mvp * vec4(a_pos, 1.0);
+    gl_Position = frag_position;
 }

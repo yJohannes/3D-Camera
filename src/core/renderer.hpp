@@ -11,9 +11,9 @@ public:
     Renderer()
     {
         if (!gladLoadGL())
-            {
-                std::cerr << "Failed to initialize GLAD\n";
-            }
+        {
+            std::cerr << "Failed to initialize GLAD\n";
+        }
     }
 
     ~Renderer()
