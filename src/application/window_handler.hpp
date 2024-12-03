@@ -11,7 +11,9 @@ private:
     EventManager m_event_manager;
 
 	Vec2i m_prev_mouse_pos;
-	bool  m_dragging = false;
+	
+    bool m_dragging = false;
+    bool m_hold_key = false;
 public:
     // Emit amount
     Signal<const Vec2u&> window_resized;
@@ -35,6 +37,12 @@ public:
 		{
             m_event_manager.trigger_event_callbacks(event);
 		}
+
+        if (m_hold_key)
+        {
+            handle_held_keys();
+        }
+
 		return;
 	}
 private:
@@ -51,15 +59,8 @@ private:
         m_event_manager.add_callback(sf::Event::KeyPressed,          this, &WindowHandler::on_key_pressed);
     }
 
-    void on_window_closed(const sf::Event& event)
-    {
-        r_window.close();
-    }
-
-    void on_window_resize(const sf::Event& event)
-    {
-        window_resized.emit(r_window.getSize());
-    }
+    void on_window_closed(const sf::Event& event) { r_window.close(); }
+    void on_window_resize(const sf::Event& event) { window_resized.emit(r_window.getSize()); }
 
     void on_mouse_pressed(const sf::Event& event)
     {
@@ -86,25 +87,69 @@ private:
 
     void on_mouse_moved(const sf::Event& event)
     {
-        Vec2i mpos = sf::Mouse::getPosition(r_window);
-        Vec2f delta = vec_cast<float>(m_prev_mouse_pos - mpos);
-        m_prev_mouse_pos = mpos;
+        // Get the mouse movement (relative delta)
+        sf::Vector2i mpos = sf::Mouse::getPosition(r_window);
+        sf::Vector2i center = vec_cast<int>(r_window.getSize() / 2u);
 
+        // Reset the mouse position to the center to keep it locked
+        sf::Mouse::setPosition(center, r_window);
+
+        sf::Vector2f delta = vec_cast<float>(mpos - center);
         mouse_moved.emit({delta.x, delta.y});
     }
     
     void on_key_pressed(const sf::Event& event)
     {
-        glm::vec3 delta(0.0f);
+        // glm::vec3 delta(0.0f);
 
         switch (event.key.code)
         {
+        case sf::Keyboard::Escape:
+            r_window.close();
+            break;
+
         case sf::Keyboard::W:
-            delta.z -= 0.5f;
+        case sf::Keyboard::S:
+        case sf::Keyboard::A:
+        case sf::Keyboard::D:
+        case sf::Keyboard::Space:
+        case sf::Keyboard::LShift:
+            m_hold_key = true;
+            break;
+        
+        default:
+            m_hold_key = false;
+            break;
+        }
+
+        // position_changed.emit(delta);
+    }
+
+    void handle_held_keys()
+    {
+        glm::vec3 delta(0.0f);
+
+        delta.z +=  0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+        delta.z += -0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+
+        delta.x += -0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+        delta.x +=  0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+        
+        delta.y +=  0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+        delta.y += -0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
+
+        position_changed.emit(delta);
+
+    }
+};
+
+/*
+        case sf::Keyboard::W:
+            delta.z += 0.5f;
             break;
         
         case sf::Keyboard::S:
-            delta.z += 0.5f;
+            delta.z -= 0.5f;
             break;
 
         case sf::Keyboard::A:
@@ -123,10 +168,4 @@ private:
             delta.y -= 0.5f;
             break;
         
-        default:
-            break;
-        }
-
-        position_changed.emit(delta);
-    }
-};
+*/

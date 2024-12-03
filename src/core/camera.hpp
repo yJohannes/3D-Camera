@@ -28,6 +28,7 @@ private:
 public:
     Camera(const glm::vec3 &position, float fov, float aspect, float near, float far)
         : m_position(position)
+        , m_camera_direction(0.0f)
         , m_fov(fov)
         , m_aspect(aspect)
         , m_near(near)
@@ -40,20 +41,39 @@ public:
         update_projection_matrix();
     }
 
-    void move(const glm::vec3 &delta)
-    {
-        m_camera_target = m_camera_target + delta;
+    // void move(const glm::vec3 &delta)
+    // {
+    //     m_camera_target = m_camera_target + delta;
 
-        m_position += delta;
+    //     m_position += delta;
+    //     update_view_matrix();
+    // }
+
+    void move(const glm::vec3& delta)
+    {
+        // Calculate movement in the respective directions
+        glm::vec3 forward_movement = m_front * delta.z;  // Forward/backward
+        glm::vec3 right_movement = m_right * delta.x;    // Left/right
+        glm::vec3 up_movement = m_world_up * delta.y;    // Up/down
+
+        // Combine the movements
+        glm::vec3 movement = forward_movement + right_movement + up_movement;
+
+        // Update position and target
+        m_position += movement;
+        m_camera_target = m_position + m_front;
+
         update_view_matrix();
     }
 
     void look(const glm::vec2& delta)
     {
         float sensitivity = 0.1f;
-        m_yaw += delta.x * sensitivity;
-        m_pitch += delta.y * sensitivity;
 
+        m_yaw += delta.x * sensitivity;
+        m_pitch += delta.y * sensitivity * -1; // Invert delta y
+
+        // Clamp the pitch to prevent flipping
         m_pitch = glm::clamp(m_pitch, -89.0f, 89.0f);
 
         // Calculate new direction vector using spherical coordinates
@@ -61,10 +81,15 @@ public:
         front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
         front.y = sin(glm::radians(m_pitch));
         front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-        
         m_front = glm::normalize(front);
+
+        // Update right and up vectors based on the new front vector
         m_right = glm::normalize(glm::cross(m_front, m_world_up));
-        m_up    = glm::normalize(glm::cross(m_right, m_front));
+        m_up = glm::normalize(glm::cross(m_right, m_front));
+
+        // Update the camera's direction and target
+        m_camera_direction = m_front;
+        m_camera_target = m_position + m_front;
 
         update_view_matrix();
     }
@@ -76,6 +101,17 @@ public:
         update_projection_matrix();
     }
 
+private:
+    void update_view_matrix()
+    {
+        m_view = glm::lookAt(m_position, m_camera_target, m_world_up);
+    }
+
+    void update_projection_matrix()
+    {
+        m_projection = glm::perspective(glm::radians(m_fov), m_aspect, m_near, m_far);  
+    }
+public:
     //////////// GETTERS ////////////
     //
     glm::mat4 get_view() const
@@ -122,16 +158,5 @@ public:
     {
         m_aspect = aspect;
         update_projection_matrix();
-    }
-
-private:
-    void update_view_matrix()
-    {
-        m_view = glm::lookAt(m_position, m_camera_target, m_up);
-    }
-
-    void update_projection_matrix()
-    {
-        m_projection = glm::perspective(glm::radians(m_fov), m_aspect, m_near, m_far);  
     }
 };

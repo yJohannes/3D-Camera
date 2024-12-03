@@ -35,44 +35,48 @@ public:
         glUseProgram(0);
     }
 
+    GLuint get_ID() const
+    { return m_program_ID; }
+
     void set_uniform_int(const std::string &variable_name, int value) const
     {
         GLint location = glGetUniformLocation(m_program_ID, variable_name.c_str());
-        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+        valid_location(location, variable_name);
         glUniform1i(location, value);
     }
 
     void set_uniform_float(const std::string &variable_name, float value) const
     {
         GLint location = glGetUniformLocation(m_program_ID, variable_name.c_str());
-        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+        valid_location(location, variable_name);
         glUniform1f(location, value);
     }
 
     void set_vec3(const std::string &variable_name, const glm::vec3 &vector) const
     {
         GLint location = glGetUniformLocation(m_program_ID, variable_name.c_str());
-        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+        valid_location(location, variable_name);
         glUniform3fv(location, 1, glm::value_ptr(vector));
     }
 
     void set_vec4(const std::string &variable_name, const glm::vec4 &vector) const
     {
         GLint location = glGetUniformLocation(m_program_ID, variable_name.c_str());
-        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+        valid_location(location, variable_name);
         glUniform4fv(location, 1, glm::value_ptr(vector));
     }
 
     void set_mat4(const std::string &variable_name, const glm::mat4 &matrix) const
     {
         GLint location = glGetUniformLocation(m_program_ID, variable_name.c_str());
-        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+        valid_location(location, variable_name);
         glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
     }
-
-
-    GLuint get_ID() const
-    { return m_program_ID; }
+private:
+    void valid_location(GLint location, const std::string& variable_name) const
+    {
+        if (location == -1) std::cerr << "Warning: Uniform '" << variable_name << "' not found or not used." << std::endl;
+    }
 
 protected:
     // Helper function to load GLSL shader files

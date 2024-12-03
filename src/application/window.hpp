@@ -28,8 +28,10 @@ public:
         , m_scene(static_cast<float>(width) / static_cast<float>(height))
     {
         m_window.setActive(true);
-        m_window.setFramerateLimit(60);
+        m_window.setFramerateLimit(165);
         m_window.setVerticalSyncEnabled(true);
+        m_window.setMouseCursorVisible(false);
+        m_window.setMouseCursorGrabbed(true);
 
         glViewport(0, 0, width, height);
 
