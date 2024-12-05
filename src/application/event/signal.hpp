@@ -15,7 +15,7 @@ public:
     }
 
     template <typename Obj>
-    void connect(Obj *obj, void (Obj::*member)(Ret))
+    void connect(Obj* obj, void (Obj::*member)(Ret))
     {
         auto slot = [obj, member](Ret value) {
             (obj->*member)(value);

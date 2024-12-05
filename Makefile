@@ -23,10 +23,6 @@ compile-glad: C:/glad/src/glad.c
 
 
 
-
-
-
-
 release:
 	@echo "* Compiling release build"
 	@g++ -O3 -DNDEBUG -c src/main.cpp -I"C:/SFML-2.6.1/include" -I"C:/glm" -I"C:/glad/include" -I./src -o build/main.o

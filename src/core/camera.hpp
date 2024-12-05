@@ -41,25 +41,16 @@ public:
         update_projection_matrix();
     }
 
-    // void move(const glm::vec3 &delta)
-    // {
-    //     m_camera_target = m_camera_target + delta;
-
-    //     m_position += delta;
-    //     update_view_matrix();
-    // }
-
     void move(const glm::vec3& delta)
     {
-        // Calculate movement in the respective directions
-        glm::vec3 forward_movement = m_front * delta.z;  // Forward/backward
-        glm::vec3 right_movement = m_right * delta.x;    // Left/right
-        glm::vec3 up_movement = m_world_up * delta.y;    // Up/down
+        static float move_factor = 0.1f;
+
+        glm::vec3 forward_movement = m_front * delta.z * move_factor;  // Forward/backward
+        glm::vec3 right_movement = m_right   * delta.x * move_factor;    // Left/right
+        glm::vec3 up_movement = m_world_up   * delta.y * move_factor;    // Up/down
 
         // Combine the movements
         glm::vec3 movement = forward_movement + right_movement + up_movement;
-
-        // Update position and target
         m_position += movement;
         m_camera_target = m_position + m_front;
 
@@ -68,7 +59,7 @@ public:
 
     void look(const glm::vec2& delta)
     {
-        float sensitivity = 0.1f;
+        static float sensitivity = 0.1f;
 
         m_yaw += delta.x * sensitivity;
         m_pitch += delta.y * sensitivity * -1; // Invert delta y
@@ -123,10 +114,10 @@ public:
     glm::mat4 get_mvp(const glm::mat4 &model) const
     { return m_projection * m_view * model; }
 
-    glm::vec3 get_position()
+    glm::vec3 get_position() const
     { return m_position; }
 
-    float get_fov()
+    float get_fov() const
     { return m_fov; }
 
     //////////// SETTERS ////////////

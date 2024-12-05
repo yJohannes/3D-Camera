@@ -21,7 +21,7 @@ public:
     }
 
     template <typename Obj>
-    void add_callback(EventType event_type, Obj *obj, void (Obj::*event_handler)(const sf::Event&))
+    void add_callback(EventType event_type, Obj* obj, void (Obj::*event_handler)(const sf::Event&))
     {
         add_callback(event_type, [obj, event_handler](const sf::Event& event) {
             (obj->*event_handler)(event);

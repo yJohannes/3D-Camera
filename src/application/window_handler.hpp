@@ -7,7 +7,7 @@
 class WindowHandler
 {
 private:
-	sf::RenderWindow &r_window;
+	sf::Window &r_window;
     EventManager m_event_manager;
 
 	Vec2i m_prev_mouse_pos;
@@ -23,7 +23,7 @@ public:
     Signal<const glm::vec2&> mouse_moved;
     Signal<const glm::vec3&> position_changed;
 public:
-	WindowHandler(sf::RenderWindow &target_window)
+	WindowHandler(sf::Window &target_window)
         : r_window(target_window)
         , m_event_manager()
 	{
@@ -87,21 +87,17 @@ private:
 
     void on_mouse_moved(const sf::Event& event)
     {
-        // Get the mouse movement (relative delta)
         sf::Vector2i mpos = sf::Mouse::getPosition(r_window);
         sf::Vector2i center = vec_cast<int>(r_window.getSize() / 2u);
 
         // Reset the mouse position to the center to keep it locked
         sf::Mouse::setPosition(center, r_window);
-
         sf::Vector2f delta = vec_cast<float>(mpos - center);
         mouse_moved.emit({delta.x, delta.y});
     }
     
     void on_key_pressed(const sf::Event& event)
     {
-        // glm::vec3 delta(0.0f);
-
         switch (event.key.code)
         {
         case sf::Keyboard::Escape:
@@ -121,25 +117,22 @@ private:
             m_hold_key = false;
             break;
         }
-
-        // position_changed.emit(delta);
     }
 
     void handle_held_keys()
     {
         glm::vec3 delta(0.0f);
 
-        delta.z +=  0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::W);
-        delta.z += -0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+        delta.z += sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+        delta.z -= sf::Keyboard::isKeyPressed(sf::Keyboard::S);
 
-        delta.x += -0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::A);
-        delta.x +=  0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+        delta.x -= sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+        delta.x += sf::Keyboard::isKeyPressed(sf::Keyboard::D);
         
-        delta.y +=  0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
-        delta.y += -0.5f * sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
+        delta.y += sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+        delta.y -= sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
 
         position_changed.emit(delta);
-
     }
 };
 
