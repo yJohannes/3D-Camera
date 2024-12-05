@@ -7,8 +7,6 @@
                 "C:/SFML-2.6.1/include",
                 "C:/glad/include",
                 "C:/glm"
-                // "C:/imgui-1.91.5/imgui-1.91.5",
-                // "C:/imgui-sfml-2.6/imgui-sfml-2.6"
             ],
             
             "defines": [
